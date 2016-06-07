@@ -8,27 +8,7 @@
 %%------------------------------------------------------------------------------
 
 all(Mod) ->
-    lists:map(fun fun_only/1, lists:filter(fun filter_test/1, Mod:module_info(exports))).
-
-fun_only({Fun, _}) -> Fun.
-
-filter_test({Fun, 1}) ->
-    is_test_fun(rev(atom_to_binary(Fun, utf8)));
-filter_test(_) ->
-    false.
-
-rev(Bin) ->
-    rev(Bin, <<>>).
-
-rev(<<>>, Acc) -> Acc;
-rev(<<H:1/binary, Rest/binary>>, Acc) ->
-    rev(Rest, <<H/binary, Acc/binary>>).
-
-is_test_fun(<<"tset_", _/binary>>) ->
-    true;
-is_test_fun(_) ->
-    false.
-
+    lists:map(fun take_left/1, lists:filter(fun is_test/1, Mod:module_info(exports))).
 
 doc(String) ->
     ct:comment(String),
@@ -37,3 +17,10 @@ doc(String) ->
 %%------------------------------------------------------------------------------
 %% private
 %%------------------------------------------------------------------------------
+
+take_left({Fun, _}) -> Fun.
+
+is_test({Fun, 1}) ->
+    lists:suffix("_test", atom_to_list(Fun));
+is_test(_) ->
+    false.
